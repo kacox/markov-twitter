@@ -44,9 +44,9 @@ def make_chains(text_string):
 def make_text(chains):
     """Take dictionary of Markov chains; return random text."""
 
-    key = choice(chains.keys())
+    key = choice(list(chains.keys()))
     words = [key[0], key[1]]
-    while key in chains:
+    while (key in chains) and (len(" ".join(words)) < 135):
         # Keep looping until we have a key that isn't in the chains
         # (which would mean it was the end of our original text).
         #
@@ -57,7 +57,16 @@ def make_text(chains):
         words.append(word)
         key = (key[1], word)
 
-    return " ".join(words)
+    tweet_text = " ".join(words)
+
+    # Make sure starts with a capital letter and ends with punctuation.
+    if not tweet_text[0].isupper():
+        tweet_text = tweet_text[0].upper() + tweet_text[1:]
+
+    if not tweet_text[-1] in [".","!","?"]:
+        tweet_text = tweet_text[:] + choice([".","!","?"])
+
+    return tweet_text
 
 
 def tweet(chains):
@@ -80,5 +89,9 @@ text = open_and_read_file(filenames)
 # Get a Markov chain
 chains = make_chains(text)
 
+# make text for tweet *chirp*
+tweet_text = make_text(chains)
+
+
 # Your task is to write a new function tweet, that will take chains as input
-# tweet(chains)
+#tweet(chains)
