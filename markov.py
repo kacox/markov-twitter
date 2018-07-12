@@ -4,6 +4,7 @@ import os
 import sys
 from random import choice
 import twitter
+import re
 
 
 def open_and_read_file(filenames):
@@ -13,10 +14,29 @@ def open_and_read_file(filenames):
 
     for filename in filenames:
         text_file = open(filename)
+
+
         body = body + text_file.read()
+
+        # use regex to find all tags (@username)
+        username_pattern = re.compile(r'@+[a-zA-Z]*')
+        all_tags = username_pattern.findall(body)
+        #print(all_tags[:5])
+
+        # turn body (BIG string) into a list
+        listified_body = list(body.split(" "))
+        print(listified_body[:10])
+
+        # remove all tags from body
+        for twitter_tag in all_tags:
+            listified_body.remove(twitter_tag)
+
+        # rejoin listified_body back into string
+        cleaned_body = " ".join(listified_body)
+
         text_file.close()
 
-    return body
+    print(cleaned_body[:200])
 
 
 def make_chains(text_string):
@@ -25,6 +45,15 @@ def make_chains(text_string):
     chains = {}
 
     words = text_string.split()
+
+    # remove @usernames
+    # cleaned_words = list(words)
+    # for word in words:
+    #     #body = body.replace("@", "")
+    #     if word[0] == "@":
+    #         cleaned_words.remove(word)
+    #         #cleaned_words.pop(cleaned_words.index(word))
+
 
     for i in range(len(words) - 2):
         key = (words[i], words[i + 1])
@@ -76,7 +105,23 @@ def tweet(chains):
     # Note: you must run `source secrets.sh` before running this file
     # to make sure these environmental variables are set.
 
-    pass
+    # make api object
+    api = twitter.Api(consumer_key=os.environ["TWITTER_CONSUMER_KEY"],
+                      consumer_secret=os.environ["TWITTER_CONSUMER_SECRET"],
+                      access_token_key=os.environ["TWITTER_ACCESS_TOKEN_KEY"],
+                      access_token_secret=os.environ["TWITTER_ACCESS_TOKEN_SECRET"])
+
+    # authenticate
+    api.VerifyCredentials()
+
+    # post tweets repetitively
+    user_input = ""
+
+    while user_input != "q":
+        status = api.PostUpdate(make_text(chains))
+        print(status.text)
+
+        user_input = input("Enter to tweet again [q to quit] > ")
 
 
 # Get the filenames from the user through a command line prompt, ex:
@@ -85,12 +130,11 @@ filenames = sys.argv[1:]
 
 # Open the files and turn them into one long string
 text = open_and_read_file(filenames)
+# print(text[:500])
 
 # Get a Markov chain
-chains = make_chains(text)
-
-# make text for tweet *chirp*
-tweet_text = make_text(chains)
+#chains = make_chains(text)
+#print(chains)
 
 
 # Your task is to write a new function tweet, that will take chains as input
