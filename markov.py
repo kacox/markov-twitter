@@ -17,9 +17,10 @@ def open_and_read_file(filenames):
 
 
         body = body + text_file.read()
+        body = body.strip("\n")
 
         # use regex to find all tags (@username)
-        username_pattern = re.compile(r'@+[a-zA-Z]*')
+        username_pattern = re.compile(r'@+[a-zA-Z0-9]*')
         all_tags = username_pattern.findall(body)
         #print(all_tags[:5])
 
@@ -28,15 +29,18 @@ def open_and_read_file(filenames):
         print(listified_body[:10])
 
         # remove all tags from body
-        for twitter_tag in all_tags:
-            listified_body.remove(twitter_tag)
+        # for tag in all_tags:
+        #     print(tag)
+        #     listified_body.remove(tag)
+
+        #print(body[:300])
 
         # rejoin listified_body back into string
-        cleaned_body = " ".join(listified_body)
+        #cleaned_body = " ".join(listified_body)
 
         text_file.close()
 
-    print(cleaned_body[:200])
+    #print(cleaned_body[:200])
 
 
 def make_chains(text_string):
